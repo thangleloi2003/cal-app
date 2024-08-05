@@ -12,7 +12,7 @@ function App() {
     }
   };
 
-  const evaluateExpression = (expression: string): number => {
+  const evaluateExpression = (expression: string): string => {
     // Replace "×" with "*" and "÷" with "/"
     expression = expression.replace(/×/g, '*').replace(/÷/g, '/');
 
@@ -33,7 +33,7 @@ function App() {
     let unaryMinus = false;
     for (const token of tokens) {
       if (!isNaN(parseFloat(token))) {
-        postfix.push(unaryMinus ? -parseFloat(token) : parseFloat(token));
+        postfix.push(unaryMinus? -parseFloat(token) : parseFloat(token));
         unaryMinus = false;
       } else if (token in precedence) {
         if (token === '-' && (postfix.length === 0 || postfix[postfix.length - 1] in precedence)) {
@@ -60,53 +60,28 @@ function App() {
         const operand1 = stack.pop()!;
         switch (token) {
           case '+':
-            stack.push(add(operand1, operand2));
+            stack.push(operand1 + operand2);
             break;
           case '-':
-            stack.push(subtract(operand1, operand2));
+            stack.push(operand1 - operand2);
             break;
           case '*':
-            stack.push(multiply(operand1, operand2));
+            stack.push(operand1 * operand2);
             break;
           case '/':
-            stack.push(divide(operand1, operand2));
+            stack.push(operand1 / operand2);
             break;
         }
       }
     }
 
-    return stack[0];
-  };
+    // Round the result to 10 decimal places and remove trailing zeros
+    const result = stack[0];
+    const roundedResult = result.toFixed(10);
+    const trimmedResult = roundedResult.replace(/0+$/, '').replace(/\.$/, '');
 
-  const decimalPlacesCount = (num: number): number => {
-    const numStr = num.toString();
-    const decimalIndex = numStr.indexOf('.');
-    return decimalIndex === -1 ? 0 : numStr.length - decimalIndex - 1;
-  };
-
-  const add = (a: number, b: number): number => {
-    const decimalPlaces = Math.max(decimalPlacesCount(a), decimalPlacesCount(b));
-    const multiplier = Math.pow(10, decimalPlaces);
-    return (Math.round(a * multiplier) + Math.round(b * multiplier)) / multiplier;
-  };
-
-  const subtract = (a: number, b: number): number => {
-    const decimalPlaces = Math.max(decimalPlacesCount(a), decimalPlacesCount(b));
-    const multiplier = Math.pow(10, decimalPlaces);
-    return (Math.round(a * multiplier) - Math.round(b * multiplier)) / multiplier;
-  };
-
-  const multiply = (a: number, b: number): number => {
-    const decimalPlaces = decimalPlacesCount(a) + decimalPlacesCount(b);
-    const multiplier = Math.pow(10, decimalPlaces);
-    return Math.round(a * b * multiplier) / multiplier;
-  };
-
-  const divide = (a: number, b: number): number => {
-    const decimalPlaces = Math.max(decimalPlacesCount(a), decimalPlacesCount(b));
-    const multiplier = Math.pow(10, decimalPlaces);
-    return Math.round(a * multiplier / b) / multiplier;
-  };
+    return trimmedResult;
+};
 
   const handleClick = (value: string) => {
     setInput((prev) => prev + value);
